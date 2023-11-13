@@ -1,62 +1,48 @@
 #include "raylib.h"
 #include "raymath.h"
+#include "Character.h"
 
-int main() 
+int main()
 {
+
 	const int windowWidth{ 384 };
 	const int windowHeight{ 384 };
 
 	InitWindow(windowWidth, windowHeight, "Top Down");
 
 	// texture map
-	Texture2D worldMap = LoadTexture("nature_tileset/WorldMap.png");
+	Texture2D map = LoadTexture("nature_tileset/WorldMap.png");
+	Vector2 mapPosition{ 0.0, 0.0 };
+	const float mapScale{ 4.f };
 
-	// texture character
-	Texture2D knight = LoadTexture("characters/knight_idle_spritesheet.png");
-	Vector2 knightPos
-	{
-		(float)windowWidth / 2.0f - 4.0f * (0.5f * (float)knight.width / 6.0f),
-		(float)windowHeight / 2.0f - 4.0f * (0.5f * (float)knight.height)
-	};
-	
-
-
-	Vector2 mapPosition{ 0, 0 };
-	float speed = 10.0;
+	Character knight{ windowWidth, windowHeight };
 
 	SetTargetFPS(60);
 
 	while(!WindowShouldClose()) 
 	{
-		
 		BeginDrawing();
 		ClearBackground(WHITE);
 
-		Vector2 direction{};
-		if(IsKeyDown(KEY_A)) direction.x -= 1.0;
-		if(IsKeyDown(KEY_D)) direction.x += 1.0;
-		if(IsKeyDown(KEY_W)) direction.y -= 1.0;
-		if(IsKeyDown(KEY_S)) direction.y += 1.0;
-
-		if(Vector2Length(direction) != 0.0)
-		{
-			// set mapPos = mapPos - direction
-			mapPosition = Vector2Subtract(mapPosition, Vector2Scale(Vector2Normalize(direction), speed));
-	
-		}
+		mapPosition = Vector2Scale(knight.getWorldPos(), -1.f);
 
 		// draw the map
-		DrawTextureEx(worldMap, mapPosition, 0.0, 4.0, WHITE);
+		DrawTextureEx(map, mapPosition, 0.0, mapScale, WHITE);
 
-		// draw the character
-		Rectangle source{ .0f,.0f, (float)knight.width / 6.f, (float)knight.height };
-		Rectangle dest{ knightPos.x, knightPos.y, 4.0f * (float)knight.width / 6.f, 4.0f * (float)knight.height };
-		DrawTexturePro(knight, source, dest, Vector2{}, .0f, WHITE);
+		knight.tick(GetFrameTime());
 
+		// check map bounds
+		if(knight.getWorldPos().x < 0.f ||
+			knight.getWorldPos().y < 0.f ||
+			knight.getWorldPos().x + windowWidth > map.width * mapScale ||
+			knight.getWorldPos().y + windowHeight > map.height * mapScale
+			)
+		{
+			knight.undoMovement();
+		}
 
 		EndDrawing();
 	}
 
 	CloseWindow();
-
 }
