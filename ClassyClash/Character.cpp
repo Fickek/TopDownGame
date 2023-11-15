@@ -63,3 +63,14 @@ void Character::undoMovement()
 {
 	worldPos = worldPosLastFrame;
 }
+
+Rectangle Character::getCharacterCollision()
+{
+	return Rectangle
+	{
+		screenPos.x,
+		screenPos.y,
+		width * scale,
+		height * scale
+	};
+}
