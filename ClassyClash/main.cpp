@@ -3,7 +3,7 @@
 #include "Character.h"
 #include "Prop.h"
 #include "Enemy.h"
-
+#include <string>
 
 int main()
 {
@@ -28,11 +28,28 @@ int main()
 
 	Enemy goblin
 	{
-		Vector2{}, LoadTexture("characters/goblin_idle_spritesheet.png"),
+		Vector2{800.f, 300.f}, 
+		LoadTexture("characters/goblin_idle_spritesheet.png"),
 		LoadTexture("characters/goblin_run_spritesheet.png")
 	};
 
-	goblin.setTarget(&knight);
+	Enemy slime
+	{
+		Vector2{500.f, 700.f},
+		LoadTexture("characters/slime_idle_spritesheet.png"),
+		LoadTexture("characters/slime_run_spritesheet.png")
+	};
+
+	Enemy* enemies[]
+	{
+		&goblin,
+		&slime
+	};
+
+	for(auto enemy : enemies) 
+	{
+		enemy->setTarget(&knight);
+	}
 
 	SetTargetFPS(60);
 
@@ -52,8 +69,26 @@ int main()
 			prop.Render(knight.getWorldPos());
 		}
 
+		if(!knight.getAlive()) // character is not alive
+		{
+			DrawText("GAME OVER", 55.f, 45.f, 40, RED);
+			EndDrawing();
+			continue;
+		}
+		else // character is alive
+		{
+			std::string knightHealth{ "Health: " };
+			knightHealth.append(std::to_string(knight.getHealth()), 0, 5);
+
+			DrawText(knightHealth.c_str(), 55.f, 45.f, 40, RED);
+		}
+
 		knight.tick(GetFrameTime());
-		goblin.tick(GetFrameTime());
+
+		for(auto enemy : enemies) 
+		{
+			enemy->tick(GetFrameTime());
+		}
 
 		// check map bounds
 		if(knight.getWorldPos().x < 0.f ||
@@ -73,7 +108,19 @@ int main()
 			}
 		}
 
+		if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+		{
 
+			for(auto enemy : enemies) 
+			{
+				if (CheckCollisionRecs(enemy->getCharacterCollision(), knight.getWeaponCollisionRec()))
+				{
+					enemy->setAlive(false);
+				}
+			}
+	
+		}
+		
 		EndDrawing();
 	}
 

@@ -9,10 +9,13 @@ class BaseCharacter
 {
 public:
 	BaseCharacter();
-	Vector2 getWorldPos() { return worldPos; };
+	Vector2 getWorldPos() { return worldPos; }
 	void undoMovement();
 	Rectangle getCharacterCollision();
 	virtual void tick(float deltaTime);
+	virtual Vector2 getScreenPos() = 0;
+	void setAlive(bool isAlive) { alive = isAlive; }
+	bool getAlive() { return alive; }
 protected:
 	Texture2D texture{ LoadTexture("characters/knight_idle_spritesheet.png") };
 	Texture2D idle{ LoadTexture("characters/knight_idle_spritesheet.png") };
@@ -21,7 +24,7 @@ protected:
 	Vector2 worldPos{};
 	Vector2 worldPosLastFrame{};
 	// 1: facing right, -1:facing left
-	float rightleft{ 1.f };
+	float rightLeft{ 1.f };
 	// animation variables
 	float runnningTime{};
 	int frame{};
@@ -31,8 +34,9 @@ protected:
 	float width{};
 	float height{};
 	float scale{ 4.f };
+	Vector2 velocity{};
 private:
-
+	bool alive{ true };
 };
 
 #endif // !BASE_CHARACTER_H
